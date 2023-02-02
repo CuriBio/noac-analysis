@@ -252,7 +252,7 @@ def single_file_complete_analysis(max_twitch_frequency : int,
             
     # save peaklets to peak ratio
     peaklet_peaks_ratio=np.asarray(peaklets_found)/np.asarray(peaks_found)
-    pd.DataFrame(peaklet_peaks_ratio).to_csv(f'./data/results - {directory_name}/xlsx/peaklets_to_peak_ratios.csv')
+    pd.DataFrame(peaklet_peaks_ratio).to_csv(f'./data/results - {directory_name}/xlsx/Peaklets_to_Peak_Ratios.csv')
     
     # remove any channels which fail to give sufficient transmitted events from channel dictionary
     filtered_channels = {k:filtered_channels[k] for k in filtered_channels if k in filtered_peaklets.keys()}
@@ -621,6 +621,20 @@ def single_file_complete_analysis(max_twitch_frequency : int,
                      f'Total transmittion events = {len(velocity_plot.index)}', fontsize=20)
         
         plt.savefig(f'./data/results - {directory_name}/plots/Velocity Delay for {key}.png', bbox_inches='tight')
+        
+        # total peak events on each electrode in channels which pass filtering
+        total_events = {}
+
+        for key in filtered_channels:
+            electrode_channel = key
+            
+            channel_events = {}
+            for electrode in filtered_channels[key]:
+                channel_events[electrode] = len(electrode_peaks[electrode])
+                
+            total_events[key] = channel_events
+            
+        pd.DataFrame.from_dict(total_events).to_csv(f'./data/results - {directory_name}/xlsx/Total_Events.csv')
         
         
 #%% Implementation 

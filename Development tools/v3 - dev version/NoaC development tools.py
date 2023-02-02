@@ -29,7 +29,7 @@ HEIGHT_FACTOR=5
 # direction of channels - 'down' type str() should be used for channels from row8 --> row 1, any other value will be row 1 --> row 8
 direction = 'up'
 
-# the number of samples which the inter peaklet sample interval can vary by before a peaklet is considered too variable to be included
+# the number of samples which the inter peaklet sample interval can vary by before a peaklet is considered too variable to be included - default 10
 PEAKLET_IRREGULARITY = 10
 
 # %%load packages
@@ -245,7 +245,8 @@ for key in filtered_channels:
         
 # save peaklets to peak ratio
 peaklet_peaks_ratio=np.asarray(peaklets_found)/np.asarray(peaks_found)
-pd.DataFrame(peaklet_peaks_ratio).to_csv('./data/results/xlsx/peaklets_to_peak_ratios.csv')
+pd.DataFrame(peaklet_peaks_ratio, index=list(filtered_channels.keys()), columns=['Ratio'])\
+    .to_csv('./data/results/xlsx/Peaklets_to_Peak_Ratios.csv')
 
 # remove any channels which fail to give sufficient transmitted events from channel dictionary
 filtered_channels = {k:filtered_channels[k] for k in filtered_channels if k in filtered_peaklets.keys()}
@@ -612,3 +613,18 @@ for key in sequential_pairs_dict:
                  f'Total transmittion events = {len(velocity_plot.index)}', fontsize=20)
     
     plt.savefig(f'./data/results/plots/Velocity Delay for {key}.png', bbox_inches='tight')
+    
+    
+#%% generate total number of peaks for each electrode
+total_events = {}
+
+for key in filtered_channels:
+    electrode_channel = key
+    
+    channel_events = {}
+    for electrode in filtered_channels[key]:
+        channel_events[electrode] = len(electrode_peaks[electrode])
+        
+    total_events[key] = channel_events
+    
+pd.DataFrame.from_dict(total_events).to_csv('./data/results/xlsx/Total_Events.csv')
