@@ -27,7 +27,7 @@ WIDTH_FACTOR=15
 HEIGHT_FACTOR=5
 
 # direction of channels - 'down' type str() should be used for channels from row8 --> row 1, any other value will be row 1 --> row 8
-direction = 'up'
+direction = 'down'
 
 # the number of samples which the inter peaklet sample interval can vary by before a peaklet is considered too variable to be included - default 10
 PEAKLET_IRREGULARITY = 10
@@ -61,12 +61,27 @@ for d in dir_list:
         
 # %%load in CSV
 # read in recording file
-recording_file=r"G:\Shared drives\Science Team\Science R&D\NoC\2_Data\Chemotherapy drug study\MEA data\15.7.22 - 22.7.22 Chemo study\20220722 - Drug Study - Plate 4(000).csv"
+recording_file=r"G:\Shared drives\Science Team\Science R&D\NoC\2_Data\GARS vs WT run 1\20220912_Day 4(000).csv"
 df = pd.read_csv(recording_file, engine="pyarrow")
 
 
 # look at data frame structure
 df.head()
+
+
+#%% data digital filtering 
+# define filtering values
+cutoff = (100,1000) # default (100,1000)
+order=4 # default 4
+sampling_rate=12500 # axion system 12500
+
+# get full list of electrodes in the recording 
+electrodes_total = [column for column in df.columns if column != 'Time (s)']
+
+# filter signals for each electrode in the recording
+for electrode in electrodes_total:
+    df[electrode] = utils.butterworth(order, cutoff, list(df[electrode]), sampling_rate)
+
 
 # %%generate electrode names and columns
 

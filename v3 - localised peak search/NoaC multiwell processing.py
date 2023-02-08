@@ -24,8 +24,8 @@ WIDTH_FACTOR=15
 # scaling factor for minimum twitch height -- larger values make peak-finding less sensitive - default 5
 HEIGHT_FACTOR=5
 
-# direction of channels - 'down' type str() should be used for channels from row8 --> row 1, any other value will be row 1 --> row 8
-DIRECTION = 'up'
+# direction of channels - 'down' type str() should be used for channels from row8 --> row 1, any other value eg 'up' will be row 1 --> row 8
+DIRECTION = 'down'
 
 # the number of samples which the inter peaklet sample interval can vary by before a peaklet is considered too variable to be included
 PEAKLET_IRREGULARITY = 10
@@ -69,9 +69,18 @@ def single_file_complete_analysis(max_twitch_frequency : int,
     # read in recording file
     df = pd.read_csv(recording_file, engine="pyarrow")
     
-    
-    # look at data frame structure
-    df.head()
+    # Apply digital filter to signals within recording
+    # define filtering values
+    cutoff = (100,1000) # default (100,1000)
+    order=4 # default 4
+    sampling_rate=12500 # axion system 12500
+
+    # get full list of electrodes in the recording 
+    electrodes_total = [column for column in df.columns if column != 'Time (s)']
+
+    # filter signals for each electrode in the recording
+    for electrode in electrodes_total:
+        df[electrode] = utils.butterworth(order, cutoff, list(df[electrode]), sampling_rate)
     
     # Generate electrode names and columns
     
@@ -640,7 +649,7 @@ def single_file_complete_analysis(max_twitch_frequency : int,
 #%% Implementation 
 
 # directory containing .csv for analysis
-file_dir = r"G:\Shared drives\Science Team\Science R&D\NoC\2_Data\Chemotherapy drug study\MEA data\20220711 - Day 5"
+file_dir = r"G:\Shared drives\Science Team\Science R&D\NoC\2_Data\GARS vs WT run 1"
 
 # generate list of .csv files in directory
 file_list = sorted([f'{file_dir}\\{f}' for f in os.listdir(file_dir) if '.csv' in f])

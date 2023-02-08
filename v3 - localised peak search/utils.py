@@ -530,3 +530,30 @@ def plot_well_plate(df: pd.DataFrame,
             fig.add_subplot(ax)
             
     return fig
+
+def butterworth(order: int, 
+                cutoff: tuple, 
+                sig: list, 
+                sampling_rate: int):
+    
+    '''
+    Two pass, bandpass butterworth filter for signal
+    
+    order (int): filter order
+    cutoff (tuple): tuple of len == 2 with frequency of low and high frequencies of the permissable band 
+    sig (list): list containing signal values
+    sampling_rate (int): frequency of the sampling rate for the given signal
+    
+    returns - Filtered version of input signal
+    '''
+    
+    # perform highpass filter first
+    sos = signal.butter(order, cutoff[0], btype='highpass', output='sos', fs=sampling_rate)
+    sig = signal.sosfiltfilt(sos, sig)
+    
+    # perform lowpass filter
+    sos = signal.butter(order, cutoff[1], btype='lowpass', output='sos', fs=sampling_rate)
+    sig = signal.sosfiltfilt(sos, sig)
+    
+    # return filtered signal
+    return sig
